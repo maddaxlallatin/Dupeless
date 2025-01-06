@@ -3,13 +3,21 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.util.ArrayList;
+import java.util.HashMap;
+
 
 public class Main {
+    static HashMap<String, File> fileHashMap = new HashMap<String, File>();
+    static ArrayList<File> duplicateFiles = new ArrayList<File>();
+
     public static void main(String[] args) {
         System.out.println("Hello world!");
         getDirectory();
+        System.out.println("Unique files: ");
+        printUniqueFiles();
+        System.out.println("Duplicate files: ");
+        printDuplicateFiles();
     }
 
 
@@ -32,19 +40,27 @@ public class Main {
         // get all files and folders in the directory
         File files = new File(directory);
         File[] fileList = files.listFiles();
+
         for (File file : fileList) {
             if (file.isDirectory()) {
                 scanDir(file.getAbsolutePath());
             } else {
                 try {
                     String fileHash = calculateHash(file);
-                    System.out.println(file.getAbsolutePath() + " : " + fileHash);
+                    if(fileHashMap.get(fileHash) == null) {
+                        fileHashMap.put(fileHash, file);
+                    } else {
+                        duplicateFiles.add(file);
+                    }
                 } catch (IOException | NoSuchAlgorithmException e) {
                     e.printStackTrace();
                 }
             }
 
         }
+
+
+
     }
 
 
@@ -68,6 +84,18 @@ public class Main {
         hashString.append(String.format("%02x", b)); // Format each byte as a 2-digit hex
     }
     return hashString.toString();
+}
+
+public static void printUniqueFiles(){
+    for (String i : fileHashMap.keySet()) {
+        System.out.println("key: " + i + " value: " + fileHashMap.get(i));
+    }
+}
+
+public static void printDuplicateFiles(){
+    for (File file : duplicateFiles) {
+        System.out.println("Duplicate file: " + file);
+    }
 }
 
 //check for a duplicate if duplicate found print the path of the duplicate file store in duplicate list
